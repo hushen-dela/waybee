@@ -25,7 +25,7 @@ const formData = [
     label: "Mobile Number",
     placeholder: "Enter Mobile Number",
     type: "number",
-    validationType: "number",
+    validationType: "string",
     validations: [
       {
         type: "required",
@@ -46,14 +46,14 @@ const formData = [
     label: "Email",
     placeholder: "Enter Email",
     type: "text",
-    validationType: "email",
+    validationType: "string",
     validations: [
       {
         type: "required",
         params: ["email is required"],
       },
       {
-        type: "isValid",
+        type: "email",
         params: ["email is inValid"],
       },
     ],
@@ -63,7 +63,7 @@ const formData = [
     label: "Gender",
     placeholder: "Select Gender",
     type: "radio",
-    validationType: "",
+    value: "male",
     options: [
       {
         label: "Male",
@@ -88,6 +88,7 @@ const formData = [
     placeholder: "Select Country",
     type: "select",
     validationType: "",
+    value: "india",
     options: [
       {
         label: "India",

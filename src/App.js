@@ -17,21 +17,35 @@ import { Formik } from "formik";
 import Heading from "./components/Heading";
 import formData from "./DynamicForm";
 import { createYupSchema } from "./lib/createSchema";
+import * as yup from "yup";
+import { useState } from "react";
+
 function App() {
+  const [personDetails, setPersonDetails] = useState(null);
   const initialValues = {};
   formData.forEach((item) => {
     initialValues[item.id] = item.value || "";
   });
-  console.log(initialValues);
   const yepSchema = formData.reduce(createYupSchema, {});
-  console.log(yepSchema);
+  const validateSchema = yup.object().shape(yepSchema);
+
   return (
     <Box p={4} display={"flex"}>
-      <Stack direction={"row"} sx={{ flex: 1 }} gap={4}>
+      <Stack
+        direction={"row"}
+        sx={{ flexDirection: { xs: "column", sm: "row" }, flex: 1 }}
+        gap={4}
+      >
         <Box sx={{ flex: 1 }}>
-          <Stack direction={"column"} sx={{}}>
+          <Stack rowGap={4}>
             <Heading label={"Form"} />
-            <Formik initialValues={initialValues}>
+            <Formik
+              initialValues={initialValues}
+              onSubmit={(values, actions) => {
+                setPersonDetails(values);
+              }}
+              validationSchema={validateSchema}
+            >
               {({
                 values,
                 errors,
@@ -40,31 +54,32 @@ function App() {
                 handleBlur,
                 handleSubmit,
                 isSubmitting,
-                /* and other goodies */
+                resetForm,
               }) => {
-                console.log(errors);
                 return (
-                  <form onSubmit={handleSubmit}>
+                  <form
+                    onSubmit={handleSubmit}
+                    onReset={() => {
+                      resetForm();
+                      setPersonDetails(null);
+                    }}
+                  >
                     {formData.map((item, index) => {
                       switch (item.type) {
                         case "text":
-                          return (
-                            <TextField
-                              {...item}
-                              defaultValue=""
-                              margin="normal"
-                              onChange={handleChange}
-                              fullWidth
-                            />
-                          );
                         case "number":
                           return (
                             <TextField
                               {...item}
+                              name={item.id}
                               defaultValue=""
                               margin="normal"
                               onChange={handleChange}
                               fullWidth
+                              error={
+                                touched[item.id] && Boolean(errors[item.id])
+                              }
+                              helperText={touched[item.id] && errors[item.id]}
                             />
                           );
                         case "radio":
@@ -100,8 +115,6 @@ function App() {
                                 value={values[item.id]}
                                 label={item.label}
                                 onChange={handleChange(item.id)}
-                                // placeholder={item.placeholder}
-                                // name={item.id}
                               >
                                 {item.options.map((option) => (
                                   <MenuItem value={option.value}>
@@ -112,12 +125,24 @@ function App() {
                             </FormControl>
                           );
                         default:
-                          return <></>;
+                          return <div></div>;
                       }
                     })}
-                    <Button variant="outlined" type="submit">
-                      Outlined
-                    </Button>
+                    <Box
+                      sx={{
+                        flex: 1,
+                        justifyContent: "center",
+                        p: 4,
+                        textAlign: "center",
+                      }}
+                    >
+                      <Button variant="outlined" type="submit">
+                        Submit
+                      </Button>
+                      <Button variant="outlined" type="reset">
+                        Reset
+                      </Button>
+                    </Box>
                   </form>
                 );
               }}
@@ -125,7 +150,18 @@ function App() {
           </Stack>
         </Box>
         <Box sx={{ flex: 1 }}>
-          <Typography>Preview</Typography>
+          <Heading label={"Preview"} />
+          <Box sx={{ p: 4 }}>
+            {personDetails &&
+              formData.map((field, index) => (
+                <Stack direction={"row"} alignItems="center">
+                  <Typography sx={{ fontSize: 18 }}>
+                    {field.label} :{" "}
+                  </Typography>
+                  <Typography>{personDetails[field.id]} </Typography>
+                </Stack>
+              ))}
+          </Box>
         </Box>
       </Stack>
     </Box>
